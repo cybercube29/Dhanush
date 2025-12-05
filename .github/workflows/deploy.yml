@@ -18,14 +18,23 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: Setup Node.js (use Node >= 20.11.0)
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20.11.0
           cache: 'npm'
 
-      - name: Install Dependencies
-        run: npm install
+
+      - name: Install Dependencies (with retry)
+        run: |
+          n=0
+          until [ $n -ge 3 ]
+          do
+            npm ci && break
+            n=$((n+1))
+            echo "Retrying npm install..."
+            sleep 5
+          done
 
       - name: Build Project
         run: npm run build
